@@ -22,9 +22,7 @@ import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.relics.RunicDome;
 import com.megacrit.cardcrawl.rewards.RewardItem;
 import com.megacrit.cardcrawl.rooms.*;
-import com.megacrit.cardcrawl.screens.DeathScreen;
 import com.megacrit.cardcrawl.screens.GameOverScreen;
-import com.megacrit.cardcrawl.screens.VictoryScreen;
 import com.megacrit.cardcrawl.screens.select.GridCardSelectScreen;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
@@ -32,10 +30,16 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 import com.megacrit.cardcrawl.ui.buttons.LargeDialogOptionButton;
 import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
 import communicationmod.patches.UpdateBodyTextPatch;
+import duelistmod.abstracts.DuelistCard;
+import duelistmod.characters.TheDuelist;
+import duelistmod.helpers.PowHelper;
+import duelistmod.helpers.Util;
+import duelistmod.powers.SummonPower;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class GameStateConverter {
 
@@ -111,7 +115,7 @@ public class GameStateConverter {
         state.put("act_boss", AbstractDungeon.bossKey);
         state.put("gold", AbstractDungeon.player.gold);
         state.put("seed", Settings.seed);
-        state.put("class", AbstractDungeon.player.chosenClass.name());
+        state.put("player_class", AbstractDungeon.player.chosenClass.name());
         state.put("ascension_level", AbstractDungeon.ascensionLevel);
 
         ArrayList<Object> relics = new ArrayList<>();
@@ -143,6 +147,7 @@ public class GameStateConverter {
             state.put("combat_state", getCombatState());
         }
         state.put("screen_state", getScreenState());
+        setScreenState(state);
 
         HashMap<String, Boolean> keys = new HashMap<>();
         keys.put("ruby", Settings.hasRubyKey);
@@ -494,6 +499,47 @@ public class GameStateConverter {
         return new HashMap<>();
     }
 
+    private static void setScreenState(HashMap<String, Object> state) {
+        ChoiceScreenUtils.ChoiceType screenType = ChoiceScreenUtils.getCurrentChoiceType();
+        switch (screenType) {
+            case EVENT:
+                state.put("event_state", getEventState());
+                break;
+            case CHEST:
+            case REST:
+                state.put("room_state", getRoomState());
+                break;
+            case CARD_REWARD:
+                state.put("card_reward_state", getCardRewardState());
+                break;
+            case COMBAT_REWARD:
+                state.put("combat_reward_state", getCombatRewardState());
+                break;
+            case MAP:
+                state.put("map_screen_state", getMapScreenState());
+                break;
+            case BOSS_REWARD:
+                state.put("boss_reward_state", getBossRewardState());
+                break;
+            case SHOP_SCREEN:
+                state.put("shop_screen_state", getShopScreenState());
+                break;
+            case GRID:
+                state.put("grid_screen_state", getGridState());
+                break;
+            case HAND_SELECT:
+                state.put("hand_select_state", getHandSelectState());
+                break;
+            case GAME_OVER:
+                state.put("game_over_state", getGameOverState());
+                break;
+        }
+    }
+
+    private static String getScreenStateType() {
+        return ChoiceScreenUtils.getCurrentChoiceType().toString();
+    }
+
     /**
      * Gets the state of the current combat in game.
      * The combat state object contains:
@@ -538,11 +584,17 @@ public class GameStateConverter {
         for(AbstractCard card : AbstractDungeon.player.limbo.group) {
             limbo.add(convertCardToJson(card));
         }
+        ArrayList<Object> graveyard = new ArrayList<>();
+        for (AbstractCard c : TheDuelist.resummonPile.group) {
+            graveyard.add(convertCardToJson(c));
+        }
         state.put("draw_pile", draw_pile);
         state.put("discard_pile", discard_pile);
         state.put("exhaust_pile", exhaust_pile);
         state.put("hand", hand);
         state.put("limbo", limbo);
+        state.put("graveyard", graveyard);
+        state.put("restricted_summon_zones", Util.isSummoningZonesRestricted());
         if (AbstractDungeon.player.cardInUse != null) {
             state.put("card_in_play", convertCardToJson(AbstractDungeon.player.cardInUse));
         }
@@ -646,6 +698,19 @@ public class GameStateConverter {
         jsonCard.put("has_target", card.target== AbstractCard.CardTarget.SELF_AND_ENEMY || card.target == AbstractCard.CardTarget.ENEMY);
         jsonCard.put("exhausts", card.exhaust);
         jsonCard.put("ethereal", card.isEthereal);
+        List<String> tags = new ArrayList<>();
+        for (AbstractCard.CardTags a : card.tags) {
+            tags.add(a.name());
+        }
+        jsonCard.put("tags", tags);
+        if (card instanceof DuelistCard) {
+            DuelistCard dc = (DuelistCard)card;
+            jsonCard.put("summons", dc.summons);
+            jsonCard.put("tributes", dc.tributes);
+        } else {
+            jsonCard.put("summons", 0);
+            jsonCard.put("tributes", 0);
+        }
         return jsonCard;
     }
 
@@ -737,6 +802,18 @@ public class GameStateConverter {
             orbs.add(convertOrbToJson(orb));
         }
         jsonPlayer.put("orbs", orbs);
+        if (player.hasPower(SummonPower.POWER_ID)) {
+            SummonPower pow = PowHelper.getPower(SummonPower.POWER_ID);
+            if (pow != null) {
+                jsonPlayer.put("summons", pow.getCardsSummoned().size());
+                jsonPlayer.put("max_summons", pow.getMaxSummons());
+                List<String> cardsSummoned = new ArrayList<>();
+                for (String s : pow.getCardsSummonedIds()) {
+                    cardsSummoned.add(s);
+                }
+                jsonPlayer.put("cards_summoned", cardsSummoned);
+            }
+        }
         return jsonPlayer;
     }
 

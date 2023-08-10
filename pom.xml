@@ -4,18 +4,21 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>autoplay</groupId>
-    <artifactId>CommunicationMod</artifactId>
-    <version>1.2.1</version>
+    <artifactId>DuelistCommunicationMod</artifactId>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>Communication Mod</name>
-    <description>Used to help external programs communicate with Slay the Spire</description>
+    <name>Duelist Communication Mod</name>
+    <description>Used to play The Duelist mod automatically</description>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <SlayTheSpire.version>11-30-2020</SlayTheSpire.version>
-        <ModTheSpire.version>3.18.1</ModTheSpire.version>
-        <BaseMod.version>5.27.0</BaseMod.version>
+        <BaseMod.version>5.52.3</BaseMod.version>
+        <SlayTheSpire.version>12-18-2022</SlayTheSpire.version>
+        <ModTheSpire.version>3.30.3</ModTheSpire.version>
+        <StSLib.version>2.10.0</StSLib.version>
+        <DuelistMod.version>3.481.22</DuelistMod.version>
+        <Steam.path>C:/Program Files (x86)/Steam/steamapps</Steam.path>
     </properties>
 
     <dependencies>
@@ -24,21 +27,35 @@
             <artifactId>slaythespire</artifactId>
             <version>${SlayTheSpire.version}</version>
             <scope>system</scope>
-            <systemPath>${basedir}/../lib/desktop-1.0.jar</systemPath>
+            <systemPath>${Steam.path}/common/SlayTheSpire/desktop-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.evacipated.cardcrawl</groupId>
             <artifactId>ModTheSpire</artifactId>
             <version>${ModTheSpire.version}</version>
             <scope>system</scope>
-            <systemPath>${basedir}/../lib/ModTheSpire.jar</systemPath>
+            <systemPath>${Steam.path}/workshop/content/646570/1605060445/ModTheSpire.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.evacipated.cardcrawl</groupId>
             <artifactId>BaseMod</artifactId>
             <version>${BaseMod.version}</version>
             <scope>system</scope>
-            <systemPath>${basedir}/../lib/BaseMod.jar</systemPath>
+            <systemPath>${Steam.path}/workshop/content/646570/1605833019/BaseMod.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.evacipated.cardcrawl</groupId>
+            <artifactId>stslib</artifactId>
+            <version>${StSLib.version}</version>
+            <scope>system</scope>
+            <systemPath>${Steam.path}/workshop/content/646570/1609158507/StSLib.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>duelistmod</groupId>
+            <artifactId>DuelistMod</artifactId>
+            <version>${DuelistMod.version}</version>
+            <scope>system</scope>
+            <systemPath>${Steam.path}/common/SlayTheSpire/mods/DuelistMod.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -50,34 +67,34 @@
     <build>
         <finalName>CommunicationMod</finalName>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.2</version>
-                <executions>
-                    <execution>
-                        <id>CommunicationMod</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <minimizeJar>true</minimizeJar>
-                            <filters>
-                                <filter>
-                                    <artifact>autoplay:CommunicationMod</artifact>
-                                </filter>
-                            </filters>
-                            <relocations>
-                                <relocation>
-                                    <pattern>com.google.gson</pattern>
-                                    <shadedPattern>com.autoplay.gson</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-shade-plugin</artifactId>
+                 <version>2.4.2</version>
+                 <executions>
+                     <execution>
+                         <id>CommunicationMod</id>
+                         <phase>package</phase>
+                         <goals>
+                             <goal>shade</goal>
+                         </goals>
+                         <configuration>
+                             <minimizeJar>true</minimizeJar>
+                             <filters>
+                                 <filter>
+                                     <artifact>autoplay:DuelistCommunicationMod</artifact>
+                                 </filter>
+                             </filters>
+                             <relocations>
+                                 <relocation>
+                                     <pattern>com.google.gson</pattern>
+                                     <shadedPattern>com.autoplay.gson</shadedPattern>
+                                 </relocation>
+                             </relocations>
+                         </configuration>
+                     </execution>
+                 </executions>
+             </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -88,7 +105,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy file="target/CommunicationMod.jar" tofile="../_ModTheSpire/mods/CommunicationMod.jar"/>
+                                <copy file="target/DuelistCommunicationMod.jar" tofile="${Steam.path}/common/SlayTheSpire/mods/DuelistCommunicationMod.jar"/>
                             </target>
                         </configuration>
                         <goals>

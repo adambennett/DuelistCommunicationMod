@@ -243,7 +243,7 @@ public class ChoiceScreenUtils {
             case COMBAT_REWARD:
                 return "skip";
             case MAP:
-                return "return";
+                return "RETURN";
             case BOSS_REWARD:
                 return "skip";
             case SHOP_SCREEN:

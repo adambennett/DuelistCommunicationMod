@@ -59,7 +59,7 @@ public class CommandExecutor {
                 return true;
             case "skip":
             case "cancel":
-            case "return":
+            case "RETURN":
             case "leave":
                 executeCancelCommand();
                 return true;
@@ -120,7 +120,7 @@ public class CommandExecutor {
     public static boolean isCommandAvailable(String command) {
         if(command.equals("confirm") || command.equalsIgnoreCase("proceed")) {
             return isConfirmCommandAvailable();
-        } else if (command.equals("skip") || command.equals("cancel") || command.equals("return") || command.equals("leave")) {
+        } else if (command.equals("skip") || command.equals("cancel") || command.equals("RETURN") || command.equals("leave")) {
             return isCancelCommandAvailable();
         } else {
             return getAvailableCommands().contains(command);

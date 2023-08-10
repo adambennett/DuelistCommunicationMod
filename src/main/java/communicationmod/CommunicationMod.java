@@ -319,7 +319,12 @@ public class CommunicationMod implements PostInitializeSubscriber, PostUpdateSub
                 listener.destroyForcibly();
             }
         }
-        ProcessBuilder builder = new ProcessBuilder(getSubprocessCommand());
+        ProcessBuilder builder = new ProcessBuilder(
+                "java",
+                "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005",
+                "-jar",
+                "ai_runner/StSAutoplayer.jar"
+        );
         File errorLog = new File("communication_mod_errors.log");
         builder.redirectError(ProcessBuilder.Redirect.appendTo(errorLog));
         try {
